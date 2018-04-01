@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h1>Let's play hangman.</h1>
+    <h1>Let's play Vue Gitman.</h1>
     <GameBoard o/>
   </div>
 </template>
