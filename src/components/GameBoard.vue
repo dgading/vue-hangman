@@ -9,17 +9,23 @@
       
       <input type="submit" value="Get Repo Name">
     </form>
-    <p>Repo name: {{ repo }}</p>
-    <p>Correct Guesses: {{correctGuesses.join("")}}</p>
-    <p>Wrong Guesses: {{wrongGuesses}}</p>
-    <form v-on:submit.prevent="guessCharacter" v-if="gameStart">
-      <label>Guess a Letter:
-        <input type="text" v-model="currentGuess" id="currentGuess"/>
-      </label>
-      
-      <input type="submit" value="Guess Letter">
-      <p>Previous Guesses: {{prevGuesses.join(', ')}}</p>
-    </form>
+    <div v-if="gameOver">
+      <p v-if="gameWon">You Won!</p>
+      <p v-else>You Lost.</p>
+      <button v-on:click="gameReset">Play again?</button>
+    </div>
+    <div v-if="gameStart">
+      <p>Repo name: {{ repo }}</p>
+      <p>Correct Guesses: {{correctGuesses.join("")}}</p>
+      <p>Wrong Guesses: {{wrongGuesses}}</p>
+      <form v-on:submit.prevent="guessCharacter" v-if="!gameOver">
+        <label>Guess a Letter:
+          <input type="text" v-model="currentGuess" id="currentGuess"/>
+        </label>
+        <input type="submit" value="Guess Letter">
+        <p>Previous Guesses: {{prevGuesses.join(', ')}}</p>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -40,7 +46,9 @@ export default {
       prevGuesses: [],
       errorMessage: "",
       correctGuesses: [],
-      wrongGuesses: 0
+      wrongGuesses: 0,
+      gameWon: null,
+      gameOver: false
     };
   },
   methods: {
@@ -73,13 +81,13 @@ export default {
         this.isGuessCorrect(theGuess);
       }
       if (vm.wrongGuesses >= 6) {
-        vm.errorMessage = "You lose.";
-        vm.gameStart = false;
+        vm.gameOver = true;
+        vm.gameWon = false;
       }
 
       if (vm.correctGuesses.join("") === vm.repo) {
-        vm.errorMessage = "You Win.";
-        vm.gameStart = false;
+        vm.gameOver = true;
+        vm.gameWon = true;
       }
       vm.currentGuess = "";
     },
@@ -112,6 +120,18 @@ export default {
         vm.wrongGuesses++;
         return false;
       }
+    },
+    gameReset: function() {
+      this.username = "";
+      this.repo = "";
+      this.gameStart = false;
+      this.currentGuess = "";
+      this.prevGuesses = [];
+      this.errorMessage = "";
+      this.correctGuesses = [];
+      this.wrongGuesses = 0;
+      this.gameWon = null;
+      this.gameOver = false;
     }
   }
 };
