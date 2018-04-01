@@ -1,8 +1,20 @@
 <template>
   <div class="gameboard">
-    <p>Enter a username below to get a random public repo name for your game.</p>
+    <button v-on:click="showRules = !showRules">{{showRules ? "Hide Rules" : "Show Rules"}}</button>
+    <div class="game-rules" v-if="showRules">
+      <h2>Game Rules:</h2>
+      <ul>
+        <li>Can guess incorrectly 6 times before losing.</li>
+        <li>Any letter, special character or number that is a valid repo name is fair game. (This includes characters like underscores, hyphens, and periods.)</li>
+        <li>All letters will be tested and converted to lowercase.</li>
+        <li>Only one character per guess.</li>
+        <li>Guessing more than one character or a character already guessed won't count against total wrong guesses.</li>
+      </ul>
+      
+    </div>
     <ErrorMessage v-if="errorMessage" v-bind:message="errorMessage"></ErrorMessage>
     <form v-on:submit.prevent="getName" v-if="!gameStart">
+      <p>To start, enter the username or organization name. The game will grab a random repo and you have to guess it.</p>
       <label>Github Username:
         <input type="text" v-model="username" id="username"/>
       </label>
@@ -12,12 +24,12 @@
     <div v-if="gameOver">
       <p v-if="gameWon">You Won!</p>
       <p v-else>You Lost.</p>
+      <p>You can visit <span class="repo-link-name">{{repo}}</span> @ <a :href="'https://github.com/' + username + '/' + repo" target="_blank">https://github.com/{{username}}/{{repo}}</a></p>
       <button v-on:click="gameReset">Play again?</button>
     </div>
     <div v-if="gameStart">
-      <p>Repo name: {{ repo }}</p>
-      <p>Correct Guesses: {{correctGuesses.join("")}}</p>
-      <p>Wrong Guesses: {{wrongGuesses}}</p>
+      <p><img class="github-avatar" :src="userAvatar" :alt="username + ' Github avatar'"/> <span class="repo-name">{{correctGuesses.join("")}}</span></p>
+      <p>Wrong Guesses: {{wrongGuesses}} / 6</p>
       <form v-on:submit.prevent="guessCharacter" v-if="!gameOver">
         <label>Guess a Letter:
           <input type="text" v-model="currentGuess" id="currentGuess"/>
@@ -48,7 +60,9 @@ export default {
       correctGuesses: [],
       wrongGuesses: 0,
       gameWon: null,
-      gameOver: false
+      gameOver: false,
+      showRules: true,
+      userAvatar: ""
     };
   },
   methods: {
@@ -57,10 +71,12 @@ export default {
       axios
         .get(`https://api.github.com/users/${vm.username}/repos`)
         .then(response => {
-          vm.repo = response.data[0].name;
+          const randomIndex = this.randomRepo(response.data.length);
+          vm.repo = response.data[randomIndex].name;
           vm.gameStart = true;
+          vm.userAvatar = response.data[randomIndex].owner.avatar_url;
           for (let i = 0; i < vm.repo.length; i++) {
-            vm.correctGuesses.push("_");
+            vm.correctGuesses.push("*");
           }
         });
     },
@@ -132,6 +148,10 @@ export default {
       this.wrongGuesses = 0;
       this.gameWon = null;
       this.gameOver = false;
+    },
+    randomRepo: max => {
+      const min = 0;
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
   }
 };
@@ -139,7 +159,21 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-div {
+.gameboard {
   border: 1px solid #212121;
+  padding: 20px 10px;
+}
+.game-rules {
+  text-align: left;
+}
+.github-avatar {
+  width: 100px;
+  border-radius: 50%;
+}
+.repo-name {
+  letter-spacing: 5px;
+}
+.repo-link-name {
+  font-weight: bold;
 }
 </style>
