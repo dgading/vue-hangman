@@ -1,24 +1,25 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <h1>Let's play hangman.</h1>
+    <GameBoard o/>
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import GameBoard from "./components/GameBoard.vue";
 
 export default {
   name: "app",
   components: {
-    HelloWorld
+    GameBoard
   }
 };
 </script>
 
 <style>
+@import url("https://fonts.googleapis.com/css?family=IBM+Plex+Mono");
 #app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  font-family: "IBM Plex Mono", monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
